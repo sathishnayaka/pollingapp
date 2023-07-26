@@ -49,7 +49,6 @@ function PollingList({navigation, route}: formTypes): JSX.Element {
 
 
   const onEndReached = () => {
-    console.log(pageNumber,"page number")
     if(pageNumber >49)
     return
     setPageNumber(pageNumber+1);

@@ -9,6 +9,12 @@ import axios from 'axios';
 import PollingList from '../src/PollingList';
 import {Alert, FlatList} from 'react-native';
 
+import { shallow } from 'enzyme';
+import { configure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import debounce from 'lodash.debounce';
+configure({ adapter: new Adapter() });
+
 jest.mock('axios');
 
 beforeEach(() => {
@@ -50,7 +56,6 @@ describe('PollingDetails', () => {
 
     const wrapper = render(<PollingList navigation={navigation} route={{}} />);
     await waitFor(() => screen.getByText('URL : https:url.com'), { timeout: 5000 });
-    console.log(wrapper.debug());
     expect(screen.getByText('URL : https:url.com')).toBeTruthy();
   }, 2000);
 
@@ -154,4 +159,21 @@ describe('PollingDetails', () => {
     expect(navigation.navigate).toHaveBeenCalledWith("json-details", {"jsonDetails": "{\"created_at\":\"2021-03-22\",\"url\":\"https:nasa.com\",\"author\":\"satheesh\",\"title\":\"my-life story\",\"objectID\":\"221121\"}"})
     fireEvent.scroll;
   })
+
+  test('testing the flatlist', async() => {
+    jest.useFakeTimers()
+    const navigation = { navigate: jest.fn() };
+    const renderItem = shallow(<PollingList navigation={navigation} route={{}}/>);
+    const flatList = renderItem.find("[testID='flatlist']");
+    // await waitFor(() =>  { flatList.simulate('endReached',{timeout: 5000 })})
+    flatList.simulate('endReached',{timeout: 5000});
+    const debouncedFunction = flatList.prop('onEndReached') as () => {};
+
+    const handleDebounce = debounce(() => {
+      debouncedFunction();
+    }, 1000);
+  
+    handleDebounce();
+    jest.runAllTimers();
+  });
 });
